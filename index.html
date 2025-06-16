@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>勤怠管理システム（従業員用）</title>
+  <title>勤怠管理</title>
   <style>
     * {
       margin: 0;
@@ -87,6 +87,40 @@
       margin-bottom: 48px;
       letter-spacing: -0.025em;
       background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .clock {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 8px 25px rgba(0, 0, 0, 0.03),
+        0 3px 10px rgba(0, 0, 0, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .clock-date {
+      font-size: 1.1em;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .clock-time {
+      font-size: 2.2em;
+      font-weight: 300;
+      color: #1e293b;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -702,9 +736,18 @@
         padding: 50px;
       }
 
-      h1 {
-        font-size: 2em;
+      .clock {
         margin-bottom: 50px;
+        padding: 24px;
+      }
+
+      .clock-date {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      .clock-time {
+        font-size: 2.6em;
       }
 
       .form-group {
@@ -816,7 +859,10 @@
     <img src="logo.png" alt="勤怠管理ロゴ">
   </div>
   <div class="container">
-    <h1>勤怠管理</h1>
+    <div class="clock">
+      <div class="clock-date" id="clockDate">2025年6月17日（火）</div>
+      <div class="clock-time" id="clockTime">14:32:45</div>
+    </div>
     <div class="form-group">
       <label for="empName">名前</label>
       <input type="text" id="empName" placeholder="氏名を入力">
@@ -848,18 +894,39 @@
   <script>
     const STORAGE_KEY = 'timeCards';
 
-    // 日本時間取得
+    // 日本時間取得（より正確な方法）
     function getJstDate() {
-      const now = new Date();
-      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-      return new Date(utc + 9 * 3600000);
+      return new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+    }
+
+    // 時計更新
+    function updateClock() {
+      const now = getJstDate();
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const date = now.getDate();
+      const weekday = weekdays[now.getDay()];
+      
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const dateStr = `${year}年${month}月${date}日（${weekday}）`;
+      const timeStr = `${hours}:${minutes}:${seconds}`;
+      
+      document.getElementById('clockDate').textContent = dateStr;
+      document.getElementById('clockTime').textContent = timeStr;
     }
 
     // YYYY-MM-DD形式の日付文字列
     function getLocalDateString(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth()+1).padStart(2,'0');
-      const d = String(date.getDate()).padStart(2,'0');
+      // 日本時間で計算する場合
+      const jstDate = date || getJstDate();
+      const y = jstDate.getFullYear();
+      const m = String(jstDate.getMonth()+1).padStart(2,'0');
+      const d = String(jstDate.getDate()).padStart(2,'0');
       return `${y}-${m}-${d}`;
     }
 
@@ -1282,6 +1349,8 @@
         saveEmpPair(nameInput.value.trim(), 'out');
       });
 
+      // ボタンホバー音効果を削除
+      
       nameInput.addEventListener('input', () => updateButtons(nameInput.value.trim()));
       document.getElementById('searchEmpName').addEventListener('input', displayEmpRecords);
       
@@ -1327,6 +1396,10 @@
           showAlert('パスワードが違います', 'error');
         }
       });
+      
+      // 時計の初期化と更新
+      updateClock();
+      setInterval(updateClock, 1000); // 1秒ごとに更新
       
       displayEmpRecords(); 
       updateButtons('');
