@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>勤怠管理システム（従業員用）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f5f5f7;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      color: #1d1d1f;
+    }
+
+    .logo {
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeInDown 0.6s ease-out 0.1s forwards;
+    }
+
+    .logo img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.04);
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out 0.2s forwards;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.75em;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 40px;
+      letter-spacing: -0.02em;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #424245;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 1em;
+      border: 1px solid #d2d2d7;
+      border-radius: 12px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      outline: none;
+      color: #1d1d1f;
+      min-height: 44px; /* iOS recommended touch target */
+      -webkit-appearance: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    input[type="text"]::placeholder {
+      color: #8e8e93;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .primary-buttons {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+    }
+
+    /* Touch-friendly improvements */
+    button {
+      font-family: inherit;
+      font-size: 1em;
+      font-weight: 500;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      outline: none;
+      min-height: 44px; /* iOS recommended touch target */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      padding: 16px 24px;
+      flex: 1;
+      color: #ffffff;
+      background: #007aff;
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #0056cc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+    }
+
+    .btn-secondary {
+      padding: 16px 24px;
+      flex: 1;
+      color: #007aff;
+      background: #ffffff;
+      border: 1px solid #007aff;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #f0f8ff;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary:active:not(:disabled) {
+      transform: translateY(0);
+      background: #e6f3ff;
+    }
+
+    button:disabled {
+      background: #f2f2f7 !important;
+      color: #8e8e93 !important;
+      border-color: #f2f2f7 !important;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .menu-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #f2f2f7;
+      color: #8e8e93;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .menu-toggle:hover {
+      background: #e5e5ea;
+      color: #424245;
+    }
+
+    .menu-toggle.active {
+      background: #007aff;
+      color: #ffffff;
+      transform: rotate(180deg);
+    }
+
+    #adminMenu {
+      margin-top: 16px;
+      display: none;
+      gap: 8px;
+      opacity: 0;
+      animation: slideDown 0.3s ease-out forwards;
+    }
+
+    #adminMenu.show {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .admin-btn {
+      padding: 12px 16px;
+      font-size: 0.9em;
+      background: #f2f2f7;
+      color: #424245;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .admin-btn:hover {
+      background: #e5e5ea;
+    }
+
+    .admin-btn.success {
+      background: rgba(52, 199, 89, 0.95);
+      color: #ffffff;
+    }
+
+    .admin-btn.success:hover {
+      background: rgba(40, 167, 69, 0.95);
+    }
+
+    .admin-btn.danger {
+      background: #ff3b30;
+      color: #ffffff;
+    }
+
+    .admin-btn.danger:hover {
+      background: #d70015;
+    }
+
+    .admin-btn.warning {
+      background: #ff9500;
+      color: #ffffff;
+    }
+
+    .admin-btn.warning:hover {
+      background: #e6820e;
+    }
+
+    .records-section {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .section-title {
+      font-size: 0.9em;
+      font-weight: 500;
+      color: #424245;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .record {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+      color: #1d1d1f;
+      border: 1px solid rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .record:hover {
+      background: #f9f9f9;
+      transform: translateX(2px);
+    }
+
+    .record:last-child {
+      margin-bottom: 0;
+    }
+
+    .record-info {
+      flex: 1;
+    }
+
+    .record-name {
+      font-weight: 500;
+      color: #1d1d1f;
+      margin-bottom: 2px;
+    }
+
+    .record-time {
+      font-size: 0.85em;
+      color: #8e8e93;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75em;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-working {
+      background: #e8f5e8;
+      color: #28a745;
+    }
+
+    .status-completed {
+      background: #e5e5ea;
+      color: #8e8e93;
+    }
+
+    .status-overtime {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .summary-button {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      color: #333;
+      padding: 12px 20px;
+      font-size: 0.9em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .summary-button:hover {
+      background: linear-gradient(135deg, #96e6df 0%, #fcc9d6 100%);
+      transform: translateY(-1px);
+    }
+
+    .summary-panel {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .summary-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .summary-title {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .summary-period {
+      font-size: 0.9em;
+      color: #8e8e93;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: #007aff;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.8em;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-details {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .close-summary {
+      background: #f2f2f7;
+      color: #424245;
+      padding: 10px 16px;
+      font-size: 0.9em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 16px;
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .close-summary:hover {
+      background: #e5e5ea;
+    }
+
+    .no-data {
+      text-align: center;
+      color: #8e8e93;
+      font-style: italic;
+      padding: 40px 20px;
+    }
+
+    /* Alert styles */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      color: #ffffff;
+      font-weight: 500;
+      font-size: 0.9em;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      backdrop-filter: blur(20px);
+      opacity: 0;
+      transform: translateX(100%);
+      animation: slideInAlert 0.3s ease-out forwards;
+    }
+
+    .alert.success {
+      background: rgba(52, 199, 89, 0.95);
+    }
+
+    .alert.error {
+      background: rgba(255, 59, 48, 0.95);
+    }
+
+    .alert.info {
+      background: rgba(0, 122, 255, 0.95);
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInAlert {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOutAlert {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    /* iPad styles */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .container {
+        max-width: 600px;
+        padding: 50px;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 50px;
+      }
+
+      .form-group {
+        margin-bottom: 30px;
+      }
+
+      input[type="text"] {
+        padding: 20px 24px;
+        font-size: 1.1em;
+      }
+
+      .btn-primary {
+        padding: 20px 32px;
+        font-size: 1.1em;
+      }
+
+      .menu-toggle {
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+      }
+
+      .admin-btn {
+        padding: 16px 20px;
+        font-size: 1em;
+      }
+
+      .records-section {
+        padding: 30px;
+      }
+
+      .record {
+        padding: 20px;
+        margin-bottom: 12px;
+      }
+
+      .record-name {
+        font-size: 1.05em;
+      }
+
+      .record-time {
+        font-size: 0.95em;
+      }
+    }
+
+    /* Mobile styles */
+    @media (max-width: 767px) {
+      .container {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .button-group {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .primary-buttons {
+        width: 100%;
+      }
+
+      .menu-toggle {
+        align-self: center;
+      }
+
+      .alert {
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100%);
+        animation: slideInAlertMobile 0.3s ease-out forwards;
+      }
+
+      @keyframes slideInAlertMobile {
+        from {
+          opacity: 0;
+          transform: translateY(-100%);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    }
+
+    /* Large screens */
+    @media (min-width: 1025px) {
+      .container {
+        max-width: 500px;
+      }
+    }
+
+    /* Focus styles for accessibility */
+    button:focus-visible {
+      outline: 2px solid #007aff;
+      outline-offset: 2px;
+    }
+
+    input:focus-visible {
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <img src="logo.png" alt="勤怠管理ロゴ">
+  </div>
+  <div class="container">
+    <h1>勤怠管理</h1>
+    <div class="form-group">
+      <label for="empName">名前</label>
+      <input type="text" id="empName" placeholder="氏名を入力">
+    </div>
+    <div class="form-group button-group">
+      <div class="primary-buttons">
+        <button id="btnClockIn" class="btn-primary" disabled>出勤</button>
+        <button id="btnClockOut" class="btn-primary" disabled>退勤</button>
+      </div>
+      <button id="toggleMenu" class="menu-toggle">⚙</button>
+    </div>
+    <div id="adminMenu">
+      <button id="backupBtn" class="admin-btn success">バックアップ</button>
+      <button id="restoreBtn" class="admin-btn warning">リストア</button>
+      <input type="file" id="restoreFile" style="display:none;">
+      <button id="clearAllBtn" class="admin-btn danger">全データ削除</button>
+    </div>
+    <div class="form-group">
+      <label for="searchEmpName">検索</label>
+      <input type="text" id="searchEmpName" placeholder="名前で検索">
+    </div>
+    <div class="records-section">
+      <div class="section-title">勤怠記録</div>
+      <div id="summaryContainer"></div>
+      <div id="empResult"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'timeCards';
+
+    // 日本時間取得
+    function getJstDate() {
+      const now = new Date();
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      return new Date(utc + 9 * 3600000);
+    }
+
+    // YYYY-MM-DD形式の日付文字列
+    function getLocalDateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // 11日区切りの期間取得
+    function getCurrentPeriod() {
+      const today = getJstDate();
+      const day = today.getDate();
+      const month = today.getMonth();
+      const year = today.getFullYear();
+      
+      let periodStart, periodEnd;
+      
+      if (day >= 11) {
+        // 11日以降なら、当月11日～翌月10日
+        periodStart = new Date(year, month, 11);
+        periodEnd = new Date(year, month + 1, 10);
+      } else {
+        // 10日以前なら、前月11日～当月10日
+        periodStart = new Date(year, month - 1, 11);
+        periodEnd = new Date(year, month, 10);
+      }
+      
+      return { start: periodStart, end: periodEnd };
+    }
+
+    // 勤務時間計算（時間差分）
+    function calculateWorkingHours(checkIn, checkOut) {
+      const start = new Date(`1970-01-01T${checkIn}`);
+      const end = new Date(`1970-01-01T${checkOut}`);
+      return (end - start) / (1000 * 60 * 60); // 時間単位
+    }
+
+    // 早朝勤務時間計算（8:30まで）
+    function calculateEarlyMorningHours(checkIn, checkOut) {
+      const start = new Date(`1970-01-01T${checkIn}`);
+      const end = new Date(`1970-01-01T${checkOut}`);
+      const limit = new Date('1970-01-01T08:30');
+      
+      if (end <= limit) {
+        return (end - start) / (1000 * 60 * 60);
+      } else if (start < limit) {
+        return (limit - start) / (1000 * 60 * 60);
+      }
+      return 0;
+    }
+
+    // 夕方勤務時間計算（16:00以降）
+    function calculateEveningHours(checkIn, checkOut) {
+      const start = new Date(`1970-01-01T${checkIn}`);
+      const end = new Date(`1970-01-01T${checkOut}`);
+      const limit = new Date('1970-01-01T16:00');
+      
+      if (start >= limit) {
+        return (end - start) / (1000 * 60 * 60);
+      } else if (end > limit) {
+        return (end - limit) / (1000 * 60 * 60);
+      }
+      return 0;
+    }
+
+    // 月次サマリー表示
+    function showMonthlySummary(name) {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const userData = data[name];
+      if (!userData) return;
+
+      const period = getCurrentPeriod();
+      
+      // 期間内のデータを集計
+      let totalDays = 0;
+      let totalHours = 0;
+      let totalEarlyMorning = 0;
+      let totalEvening = 0;
+      let incompleteCount = 0;
+
+      Object.keys(userData).forEach(date => {
+        const recordDate = new Date(date);
+        if (recordDate >= period.start && recordDate <= period.end) {
+          userData[date].forEach(rec => {
+            if (rec.checkIn) {
+              totalDays++;
+              if (rec.checkOut) {
+                const hours = calculateWorkingHours(rec.checkIn, rec.checkOut);
+                const earlyMorning = calculateEarlyMorningHours(rec.checkIn, rec.checkOut);
+                const evening = calculateEveningHours(rec.checkIn, rec.checkOut);
+                
+                totalHours += hours;
+                totalEarlyMorning += earlyMorning;
+                totalEvening += evening;
+              } else {
+                incompleteCount++;
+              }
+            }
+          });
+        }
+      });
+
+      const totalNormal = totalHours - totalEarlyMorning - totalEvening;
+      const totalOvertime = Math.max(0, totalHours - totalDays * 8); // 8時間超過分
+      
+      const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", 
+                         "7月", "8月", "9月", "10月", "11月", "12月"];
+      
+      const startMonth = period.start.getMonth();
+      const endMonth = period.end.getMonth();
+      let periodLabel;
+      
+      if (startMonth === endMonth) {
+        periodLabel = period.start.getFullYear() + "年 " + monthNames[startMonth];
+      } else {
+        const startYear = period.start.getFullYear();
+        const endYear = period.end.getFullYear();
+        if (startYear === endYear) {
+          periodLabel = startYear + "年 " + monthNames[startMonth] + "11日～" + monthNames[endMonth] + "10日";
+        } else {
+          periodLabel = startYear + "年" + monthNames[startMonth] + "11日～" + endYear + "年" + monthNames[endMonth] + "10日";
+        }
+      }
+
+      const averageHours = totalDays > 0 ? (totalHours / totalDays).toFixed(1) : '0.0';
+
+      const summaryContainer = document.getElementById('summaryContainer');
+      
+      // 既存のサマリーパネルを削除
+      const existingPanel = document.getElementById('summaryPanel');
+      if (existingPanel) {
+        existingPanel.remove();
+      }
+      
+      const summaryPanel = document.createElement('div');
+      summaryPanel.className = 'summary-panel';
+      summaryPanel.id = 'summaryPanel';
+      summaryPanel.style.display = 'block';
+      
+      summaryPanel.innerHTML = 
+        '<div class="summary-header">' +
+          '<div class="summary-title">' + name + 'さんの月次サマリー</div>' +
+          '<div class="summary-period">' + periodLabel + '</div>' +
+        '</div>' +
+        
+        '<div class="summary-stats">' +
+          '<div class="stat-card">' +
+            '<div class="stat-value">' + totalDays + '</div>' +
+            '<div class="stat-label">出勤日数</div>' +
+          '</div>' +
+          '<div class="stat-card">' +
+            '<div class="stat-value">' + totalHours.toFixed(1) + '</div>' +
+            '<div class="stat-label">総勤務時間</div>' +
+          '</div>' +
+          '<div class="stat-card">' +
+            '<div class="stat-value">' + totalOvertime.toFixed(1) + '</div>' +
+            '<div class="stat-label">残業時間</div>' +
+          '</div>' +
+          '<div class="stat-card">' +
+            '<div class="stat-value">' + incompleteCount + '</div>' +
+            '<div class="stat-label">要確認</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="summary-details">' +
+          '<div style="font-weight: 600; margin-bottom: 12px; color: #424245;">詳細</div>' +
+          '<div class="summary-row">' +
+            '<span>平均勤務時間/日</span>' +
+            '<span>' + averageHours + '時間</span>' +
+          '</div>' +
+          '<div class="summary-row">' +
+            '<span>通常勤務時間</span>' +
+            '<span>' + totalNormal.toFixed(1) + '時間</span>' +
+          '</div>' +
+          '<div class="summary-row">' +
+            '<span>早朝勤務時間</span>' +
+            '<span>' + totalEarlyMorning.toFixed(1) + '時間</span>' +
+          '</div>' +
+          '<div class="summary-row">' +
+            '<span>夕方勤務時間</span>' +
+            '<span>' + totalEvening.toFixed(1) + '時間</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<button class="close-summary" onclick="closeSummary()">閉じる</button>';
+        
+      summaryContainer.appendChild(summaryPanel);
+    }
+
+    // サマリーを閉じる
+    function closeSummary() {
+      const panel = document.getElementById('summaryPanel');
+      if (panel) {
+        panel.style.display = 'none';
+      }
+    }
+
+    // 出勤／退勤
+    function saveEmpPair(name, type) {
+      const now = getJstDate();
+      const today = getLocalDateString(now);
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      if (!data[name]) data[name] = {};
+      if (!data[name][today]) data[name][today] = [];
+      const recs = data[name][today];
+      const last = recs.length ? recs[recs.length-1] : null;
+
+      if (type === 'in') {
+        if (last && last.checkOut === null) {
+          showAlert('連続した出勤はできません', 'error');
+          return;
+        }
+        recs.push({ checkIn: now.toTimeString().slice(0,5), checkOut: null });
+      } else {
+        if (!last || last.checkOut !== null) {
+          showAlert('先に出勤してください', 'error');
+          return;
+        }
+        last.checkOut = now.toTimeString().slice(0,5);
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showAlert('記録しました', 'success');
+      document.getElementById('empName').value = '';
+      updateButtons('');
+      displayEmpRecords();
+    }
+
+    // アラート表示
+    function showAlert(message, type = 'info') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert ${type}`;
+      alertDiv.textContent = message;
+      
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        alertDiv.style.animation = 'slideOutAlert 0.3s ease-in forwards';
+        setTimeout(() => {
+          if (document.body.contains(alertDiv)) {
+            document.body.removeChild(alertDiv);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // ボタン制御
+    function updateButtons(name) {
+      const btnIn = document.getElementById('btnClockIn');
+      const btnOut = document.getElementById('btnClockOut');
+      if (!name) {
+        btnIn.disabled = true;
+        btnOut.disabled = true;
+        return;
+      }
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')[name] || {};
+      const dates = Object.keys(data).sort().reverse();
+      const lastDate = dates[0];
+      const lastRec = lastDate ? data[lastDate][data[lastDate].length-1] : null;
+      const today = getLocalDateString(getJstDate());
+      
+      if (!lastRec || lastRec.checkOut !== null || lastDate !== today) {
+        btnIn.disabled = false;
+        btnOut.disabled = true;
+      } else {
+        btnIn.disabled = true;
+        btnOut.disabled = false;
+      }
+    }
+
+    // 一覧表示＋検索
+    function displayEmpRecords() {
+      const filter = document.getElementById('searchEmpName').value.trim().toLowerCase();
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const container = document.getElementById('empResult');
+      container.innerHTML = '';
+      
+      const today = getLocalDateString(getJstDate());
+      
+      let hasRecords = false;
+      let searchedNames = [];
+      
+      Object.keys(data)
+        .filter(name => name.toLowerCase().includes(filter))
+        .forEach(name => {
+          // 検索にヒットした名前を記録
+          if (!searchedNames.includes(name)) {
+            searchedNames.push(name);
+          }
+          
+          Object.keys(data[name]).sort().reverse().forEach(date => {
+            data[name][date].forEach(rec => {
+              if (rec.checkIn) {
+                hasRecords = true;
+                const div = document.createElement('div');
+                div.className = 'record';
+                
+                const info = document.createElement('div');
+                info.className = 'record-info';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'record-name';
+                nameDiv.textContent = name;
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'record-time';
+                timeDiv.textContent = `${date} ${rec.checkIn}${rec.checkOut ? ` - ${rec.checkOut}` : ''}`;
+                
+                info.appendChild(nameDiv);
+                info.appendChild(timeDiv);
+                
+                const badge = document.createElement('div');
+                
+                // 日付チェックを追加
+                const isToday = date === today;
+                let statusClass, statusText;
+                
+                if (rec.checkOut) {
+                  statusClass = 'status-completed';
+                  statusText = '完了';
+                } else if (isToday) {
+                  statusClass = 'status-working';
+                  statusText = '勤務中';
+                } else {
+                  statusClass = 'status-overtime';
+                  statusText = '要確認';
+                }
+                
+                badge.className = `status-badge ${statusClass}`;
+                badge.textContent = statusText;
+                
+                div.appendChild(info);
+                div.appendChild(badge);
+                container.appendChild(div);
+              }
+            });
+          });
+        });
+      
+      // 既存のサマリーボタンを更新（削除しない）
+      const existingButton = document.querySelector('.summary-button');
+      
+      // 検索結果が1人の場合、月次サマリーボタンを表示
+      if (searchedNames.length === 1 && hasRecords) {
+        if (!existingButton) {
+          const summaryButton = document.createElement('button');
+          summaryButton.className = 'summary-button';
+          summaryButton.textContent = `${searchedNames[0]}さんの月次サマリーを表示`;
+          summaryButton.onclick = () => showMonthlySummary(searchedNames[0]);
+          document.getElementById('summaryContainer').appendChild(summaryButton);
+        } else {
+          // ボタンが既にある場合は内容を更新
+          existingButton.textContent = `${searchedNames[0]}さんの月次サマリーを表示`;
+          existingButton.onclick = () => showMonthlySummary(searchedNames[0]);
+        }
+      } else {
+        // 1人以外の場合はボタンを削除（ただしサマリーパネルは保持）
+        if (existingButton) {
+          existingButton.remove();
+        }
+      }
+      
+      if (!hasRecords) {
+        const noData = document.createElement('div');
+        noData.className = 'no-data';
+        noData.textContent = 'まだ記録がありません';
+        container.appendChild(noData);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const nameInput = document.getElementById('empName');
+      const btnClockIn = document.getElementById('btnClockIn');
+      const btnClockOut = document.getElementById('btnClockOut');
+      
+      document.getElementById('toggleMenu').addEventListener('click', (e) => {
+        const menu = document.getElementById('adminMenu');
+        const toggle = document.getElementById('toggleMenu');
+        const isOpen = menu.style.display === 'flex';
+        
+        if (isOpen) {
+          menu.style.display = 'none';
+          menu.classList.remove('show');
+          toggle.classList.remove('active');
+        } else {
+          menu.style.display = 'flex';
+          menu.classList.add('show');
+          toggle.classList.add('active');
+        }
+      });
+
+      btnClockIn.addEventListener('click', () => {
+        saveEmpPair(nameInput.value.trim(), 'in');
+      });
+
+      btnClockOut.addEventListener('click', () => {
+        saveEmpPair(nameInput.value.trim(), 'out');
+      });
+
+      nameInput.addEventListener('input', () => updateButtons(nameInput.value.trim()));
+      document.getElementById('searchEmpName').addEventListener('input', displayEmpRecords);
+      
+      document.getElementById('backupBtn').addEventListener('click', () => {
+        const blob = new Blob([localStorage.getItem(STORAGE_KEY) || '{}'], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); 
+        a.href = url; 
+        a.download = 'timecards_backup.json'; 
+        a.click(); 
+        URL.revokeObjectURL(url);
+        showAlert('バックアップを保存しました', 'success');
+      });
+
+      document.getElementById('restoreBtn').addEventListener('click', () => {
+        document.getElementById('restoreFile').click();
+      });
+
+      document.getElementById('restoreFile').addEventListener('change', e => {
+        const reader = new FileReader(); 
+        reader.onload = ev => {
+          try {
+            JSON.parse(ev.target.result);
+            localStorage.setItem(STORAGE_KEY, ev.target.result);
+            displayEmpRecords(); 
+            updateButtons(nameInput.value.trim());
+            showAlert('データを復元しました', 'success');
+          } catch {
+            showAlert('無効なデータ形式です', 'error');
+          }
+        }; 
+        reader.readAsText(e.target.files[0]);
+      });
+
+      document.getElementById('clearAllBtn').addEventListener('click', () => {
+        const pwd = prompt('パスワードを入力してください:');
+        if (pwd === '4564') {
+          localStorage.removeItem(STORAGE_KEY);
+          displayEmpRecords(); 
+          updateButtons('');
+          showAlert('全データを削除しました', 'success');
+        } else if (pwd !== null) {
+          showAlert('パスワードが違います', 'error');
+        }
+      });
+      
+      displayEmpRecords(); 
+      updateButtons('');
+    });
+  </script>
+</body>
+</html>
